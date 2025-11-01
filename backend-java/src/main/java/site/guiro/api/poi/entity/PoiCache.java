@@ -43,14 +43,14 @@ public class PoiCache {
     private Instant ttlUntil;
 
     @Builder.Default
-    @OneToMany(mappedBy = "poi_cache", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "poiKey", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TourSession> tourSessionList = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "poi_cache", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "poiKey", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ExtractedSlot> extractedSlotList = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "poi_cache", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "poiKey", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CaptureImage> captureImageList = new ArrayList<>();
 }

@@ -32,6 +32,6 @@ public class CaptureImage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "poi_key")
-    private PoiCache poiKey; // nullable, 찍을 때 인식된 관광지
+    private PoiCache poiKey;
 
 }
