@@ -20,8 +20,9 @@ public class CaptureImage {
     @Column(name = "image_id")
     private Long imageId;
 
-    @Column(name = "url", length = 100, nullable = false)
-    private String image_key; //
+    @Setter
+    @Column(name = "url", length = 100)
+    private String imageKey; // S3에 들어갈 사진 키값
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
