@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Any
+from typing import Dict, Any
 from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException, status
 from fastapi.responses import JSONResponse, PlainTextResponse
 from loguru import logger
@@ -41,7 +41,7 @@ async def analyze_photo(
     # 로깅
     logger.info(f"[sessionId={sessionId}] poiKey={poiKey}, file={image.filename}, size={size_mb:.2f}MB")
 
-    # TODO: 전처리 + 색채 분석 + YOLO 분석 (다음 단계에서 구현)
+    # 전처리 + 색채 분석 + YOLO 분석 (다음 단계에서 구현)
     # 지금은 더미 값
     dummy_score = 0.82
     dummy_colors = ["#d7b97d", "#4a3f28", "#c1a35e"]
