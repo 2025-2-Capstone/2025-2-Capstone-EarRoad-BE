@@ -18,7 +18,7 @@ def occlusion_score(img_bgr: np.ndarray) -> float:
     렌즈 가림(손가락 등) 판단용 간단 지표
     - 스킨톤 비율(YCrCb)
     - 저주파(blurred) 비율
-    두 지표를 가중합하여 0~1 스케일로 반환 클수록 가림 확률 증가
+    두 지표를 0~1 스케일로 반환, 클수록 가림 확률 증가
     """
     if img_bgr is None or img_bgr.ndim != 3:
         return 0.0
@@ -51,7 +51,7 @@ def quality_check(
     if img_bgr is None or img_bgr.ndim != 3:
         return False
 
-    # 1) 샤프니스 검사
+    # 1) 흐림 검사
     sharp_val = compute_sharpness_laplacian(img_bgr)
     if sharp_val < blur_threshold:
         return False

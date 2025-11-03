@@ -1,5 +1,4 @@
 # app/services/phash.py
-from typing import Tuple
 import numpy as np
 import cv2
 
@@ -59,6 +58,12 @@ def _bits_to_hex(bits: np.ndarray) -> str:
     hex_len = total_bits // 4
     return f"{value:0{hex_len}x}"
 
+def _popcount(x: int) -> int:
+    bc = getattr(int, "bit_count", None)
+    if bc is not None:
+        return x.bit_count()
+
+    return bin(x).count("1")
 
 def hamming_distance_hex(h1: str, h2: str) -> int:
     """
@@ -72,4 +77,4 @@ def hamming_distance_hex(h1: str, h2: str) -> int:
     b = int(h2.zfill(max_len), 16)
     x = a ^ b
     # Python 3.9: int.bit_count() 사용 가능
-    return x.bit_count()
+    return _popcount(x)

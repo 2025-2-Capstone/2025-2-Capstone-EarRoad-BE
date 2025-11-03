@@ -9,7 +9,7 @@ import cv2
 
 def _pil_open_with_exif_orientation(file_bytes: bytes) -> Optional[Image.Image]:
     """
-    바이트에서 PIL 이미지 로드 + EXIF 회전 보정.
+    바이트에서 PIL 이미지 로드 + EXIF 회전 보정
     실패 시 None 반환.
     """
     try:
@@ -26,8 +26,8 @@ def _pil_open_with_exif_orientation(file_bytes: bytes) -> Optional[Image.Image]:
 
 def _pil_to_cv_bgr(img: Image.Image) -> np.ndarray:
     """
-    PIL.Image → OpenCV BGR ndarray
-    RGBA인 경우 알파 채널은 드롭(RGB로 변환 후 진행).
+    PIL.Image - OpenCV BGR ndarray
+    RGBA인 경우 RGB로 변환 후 진행
     """
     if img.mode == "RGBA":
         img = img.convert("RGB")
@@ -39,9 +39,9 @@ def _pil_to_cv_bgr(img: Image.Image) -> np.ndarray:
 
 def load_image_from_bytes(file_bytes: bytes) -> Optional[np.ndarray]:
     """
-    입력 바이트를 OpenCV BGR(ndarray, uint8)로 반환.
+    입력 바이트를 OpenCV BGR(ndarray, uint8)로 반환
     - EXIF 회전 보정
-    - 색공간 RGB→BGR 변환
+    - 색공간 RGB - BGR 변환
     실패 시 None.
     """
     pil_img = _pil_open_with_exif_orientation(file_bytes)

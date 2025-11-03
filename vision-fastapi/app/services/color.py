@@ -1,5 +1,4 @@
 # app/services/color.py
-from typing import Tuple
 import numpy as np
 import cv2
 

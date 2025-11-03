@@ -25,5 +25,5 @@ guiro:
   vision:
     base-url: http://127.0.0.1:8000
     token: dev-shared-token
-    connect-timeout-ms: 1000
+    connect-timeout-ms: 5000
     read-timeout-ms: 5000
