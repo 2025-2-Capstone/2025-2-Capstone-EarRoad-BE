@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -15,6 +14,6 @@ public class ScriptRequest {
     @NotBlank
     private String poiKey;
 
-    private List<MultipartFile> images;
+    private MultipartFile image;
 
 }

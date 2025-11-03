@@ -18,8 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScriptService {
     public ScriptResponse generateScript(ScriptRequest request) {
-        List<MultipartFile> images = request.getImages();
-        if (images == null || images.isEmpty()) {
+        MultipartFile image = request.getImage();
+        if (image == null || image.isEmpty()) {
             // 실제에선 커스텀 예외 던지기
             return ScriptResponse.builder()
                     .scriptId("ERROR_NO_IMAGE")
@@ -28,13 +28,13 @@ public class ScriptService {
         }
 
         // 2) (예시) FastAPI 분석 → 대표 이미지 선택 (스텁)
-        MultipartFile chosen = images.getFirst();
+
 
         // 3) poiKey로 텍스트 조회 (스텁)
         String poiText = "POI(" + request.getPoiKey() + ") 기본 텍스트";
 
         // 4) Gemini 호출해 스크립트 생성 (스텁)
-        String script = "[DEMO] " + poiText + " + 대표이미지(" + chosen.getOriginalFilename() + ") 기반 스크립트";
+        String script = "[DEMO] " + poiText + " + 대표이미지(" + image.getOriginalFilename() + ") 기반 스크립트";
 
         // 5) ID 발급/저장 로직은 필요 시 추가
         return ScriptResponse.builder()
@@ -42,4 +42,6 @@ public class ScriptService {
                 .text(script)
                 .build();
     }
+
+
 }
