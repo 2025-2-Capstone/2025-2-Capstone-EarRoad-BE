@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import site.guiro.api.guide.dto.AnalysisResult;
-import site.guiro.api.guide.dto.ScriptRequest;
-import site.guiro.api.guide.dto.ScriptResponse;
 
 /**
  * - 이미지 분석(FastAPI/Python) : 여러 장 중 품질/콘텐츠 기준으로 대표 이미지 1장 선택
