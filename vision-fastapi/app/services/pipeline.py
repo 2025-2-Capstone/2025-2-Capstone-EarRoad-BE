@@ -2,7 +2,7 @@
 from typing import Dict, Any
 from time import perf_counter
 from loguru import logger
-
+from app.config import settings
 from app.models.dto import AnalysisResult, ObjectDetection
 from app.services import utils, quality, color, phash, yolo
 
@@ -60,7 +60,14 @@ def analyze_photo_pipeline(
 
             #  객체 탐지 (더미/YOLO)
             y_t0 = perf_counter()
-            objects_val = yolo.detect_objects(img_bgr)
+            objects_val = yolo.detect_objects(
+                img_bgr=img_bgr,
+                model_path=settings.MODEL_PATH,  # ← 명시 전달 (preload가 안돼도 안전)
+                imgsz=settings.YOLO_IMG_SIZE,
+                conf_threshold=settings.YOLO_CONF,
+                max_det=settings.YOLO_MAX_DET,
+                device=settings.YOLO_DEVICE,
+            )
             y_dt = (perf_counter() - y_t0) * 1000.0
 
         total_ms = (perf_counter() - t0) * 1000.0

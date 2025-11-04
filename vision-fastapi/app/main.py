@@ -11,9 +11,8 @@ from loguru import logger
 from .config import settings
 from .deps import verify_shared_token
 from .models.dto import AnalysisResult
-from .services import yolo
 from .services.pipeline import analyze_photo_pipeline, PipelineError
-
+from .services.yolo import warmup_yolo, unload_yolo
 
 _LOG_SINK_IDS: List[int] = []
 _TMP_DIRS: List[str] = []  # 필요 시 임시 디렉터리 경로를 여기에 append
@@ -48,33 +47,6 @@ def _cleanup_logging() -> None:
         except Exception:
             pass
 
-def _cleanup_yolo() -> None:
-    """
-    YOLO 모델/메모리 정리:
-      - 전역 모델 참조 해제
-      - GPU 사용 시 캐시 비우기
-      - 가비지 컬렉션 강제
-    """
-    try:
-        # 전역 모델 캐시 해제 (yolo 모듈 내부 전역)
-        if getattr(yolo, "_YOLO_MODEL", None) is not None:
-            try:
-                # torch가 있으면 GPU 캐시도 비우기
-                import torch  # type: ignore
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
-            except Exception:
-                pass
-            # 참조 해제
-            try:
-                del yolo._YOLO_MODEL  # type: ignore[attr-defined]
-            except Exception:
-                yolo._YOLO_MODEL = None  # type: ignore[attr-defined]
-    except Exception:
-        pass
-    finally:
-        gc.collect()
-
 def _cleanup_tmpdirs() -> None:
     """
     임시 디렉터리(있다면) 정리. 현재는 사용 계획 없지만 훅만 남겨둠.
@@ -87,36 +59,48 @@ def _cleanup_tmpdirs() -> None:
         finally:
             _TMP_DIRS.remove(path)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # --- startup ---
     setup_logging()
     try:
         if settings.MODEL_PATH:
-            yolo.get_yolo_model(settings.MODEL_PATH)  # 선택적 프리로드
-    except Exception as e:
-        logger.warning(f"YOLO preload skipped: {e}")
+            ok = warmup_yolo(model_path=settings.MODEL_PATH, imgsz=640)
+            logger.info("YOLO preload/warmup: {} (MODEL_PATH={})", ok, settings.MODEL_PATH)
+        else:
+            logger.info("MODEL_PATH 비어있음 → YOLO 더미 모드로 시작")
+    except Exception:
+        logger.exception("YOLO preload/warmup 중 예외 (더미 모드로 계속)")
 
-    # 여기서 앱 실행
+    # 애플리케이션 실행
     yield
 
-    # 앱 종료
+    # --- shutdown ---
     try:
-        _cleanup_yolo()
+        unload_yolo()  # ← yolo.py의 안전한 언로드/캐시 비움
+    except Exception:
+        logger.exception("YOLO unload 중 예외")
     finally:
         try:
             _cleanup_tmpdirs()
+        except Exception:
+            logger.exception("임시 디렉터리 정리 중 예외")
         finally:
-            _cleanup_logging()
+            try:
+                _cleanup_logging()
+            except Exception:
+                # 마지막 정리이므로 로거 예외는 억제
+                pass
+            gc.collect()
 
 
 app = FastAPI(title="Guiro Vision API", version="0.2.0")
-
 
 @app.get("/health", response_class=PlainTextResponse)
 async def health():
     """서버 상태 확인용"""
     return "OK"
-
 
 @app.post(
     "/analyze/photo",
