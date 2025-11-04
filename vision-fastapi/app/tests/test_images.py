@@ -1,9 +1,12 @@
-# test_batch.py
 import glob, requests, json
+from pathlib import Path
 
+n = 3
 URL = "http://127.0.0.1:8000/analyze/photo"
 H = {"X-Auth-Token": "dev-shared-token"}
-imgs = sorted(glob.glob("samples/*.jpg"))[:10]
+
+SAMPLES_DIR = Path(__file__).parent / "samples"
+imgs = sorted(SAMPLES_DIR.glob("*.jpg"))[:n]  # <-- 항상 app/tests/samples/*.jpg
 
 for i, path in enumerate(imgs, 1):
     with open(path, "rb") as f:
