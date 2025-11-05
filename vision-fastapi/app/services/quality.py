@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-
+from loguru import logger
 
 def compute_sharpness_laplacian(img_bgr: np.ndarray) -> float:
     """
@@ -39,8 +39,8 @@ def occlusion_score(img_bgr: np.ndarray) -> float:
 def quality_check(
         img_bgr: np.ndarray,
         *,
-        blur_threshold: float = 100.0,
-        occlusion_threshold: float = 0.7,
+        blur_threshold,
+        occlusion_threshold,
 ) -> bool:
     """
     품질검사 (fast early-stop)
@@ -53,6 +53,8 @@ def quality_check(
 
     # 1) 흐림 검사
     sharp_val = compute_sharpness_laplacian(img_bgr)
+    logger.info(f"Sharpness={sharp_val:.5f} (threshold={blur_threshold})")
+
     if sharp_val < blur_threshold:
         return False
 

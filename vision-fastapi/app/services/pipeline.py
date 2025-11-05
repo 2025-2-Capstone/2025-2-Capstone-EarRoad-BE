@@ -16,9 +16,9 @@ def analyze_photo_pipeline(
         poi_key: str,
         session_id: str,
         *,
-        max_side: int = 1024,           # 이미지 리사이즈 제한
-        blur_threshold: float = 100.0,  # 샤프니스 기준
-        occlusion_threshold: float = 0.7,  # 렌즈가림 기준
+        max_side,           # 이미지 리사이즈 제한
+        blur_threshold,  # 샤프니스 기준
+        occlusion_threshold,  # 렌즈가림 기준
 ) -> Dict[str, Any]:
     """
     단일 사진에 대한 전체 분석 파이프라인
