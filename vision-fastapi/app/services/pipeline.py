@@ -2,9 +2,9 @@
 from typing import Dict, Any
 from time import perf_counter
 from loguru import logger
-from app.config import settings
-from app.models.dto import AnalysisResult, ObjectDetection
-from app.services import utils, quality, color, phash, yolo
+from ..config import settings
+from ..models.dto import AnalysisResult, ObjectDetection
+from ..services import utils, quality, color, phash, yolo
 
 
 class PipelineError(RuntimeError):
