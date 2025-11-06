@@ -141,6 +141,7 @@ async def analyze_photo(
             blur_threshold=2500.0,
             occlusion_threshold=0.7,
         )
+
         # pydantic v2: 모델 인스턴스로 반환하면 FastAPI가 알아서 JSON 직렬화
         return AnalysisResult(**result_dict)
 

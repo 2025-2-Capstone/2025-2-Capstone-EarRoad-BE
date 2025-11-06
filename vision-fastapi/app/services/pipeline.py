@@ -1,5 +1,5 @@
 # app/services/pipeline.py
-from typing import Dict, Any
+from typing import Dict, Any, List
 from time import perf_counter
 from loguru import logger
 from ..config import settings
@@ -10,6 +10,56 @@ from ..services import utils, quality, color, phash, yolo
 class PipelineError(RuntimeError):
     """사진 분석 중 오류가 발생한 경우"""
 
+def _clamp01(value: float) -> float:
+    return max(0.0, min(1.0, value))
+
+
+def _score_colorfulness(colorfulness: float) -> float:
+    max_ref = settings.SCORE_COLORFULNESS_MAX
+    if max_ref <= 0:
+        return 0.0
+    return _clamp01(colorfulness / max_ref)
+
+
+def _score_warm_ratio(warm_ratio: float) -> float:
+    tolerance = settings.SCORE_WARM_TOLERANCE
+    if tolerance <= 0:
+        return 0.0
+    delta = abs(warm_ratio - settings.SCORE_WARM_TARGET)
+    return _clamp01(1.0 - (delta / tolerance))
+
+
+def _score_objects(objects: List[ObjectDetection]) -> float:
+    label_weights = settings.SCORE_OBJECT_LABEL_WEIGHTS or {}
+    default_weight = settings.SCORE_OBJECT_DEFAULT_WEIGHT
+    score = 0.0
+    for obj in objects:
+        weight = label_weights.get(obj.label, default_weight)
+        score += max(0.0, obj.confidence) * max(0.0, weight)
+    return score
+
+
+def score_analysis(
+        *,
+        quality_passed: bool,
+        colorfulness: float,
+        warm_ratio: float,
+        objects: List[ObjectDetection],
+) -> float:
+    if not quality_passed:
+        return 0.0
+
+    color_score = _score_colorfulness(colorfulness)
+    warm_score = _score_warm_ratio(warm_ratio)
+    object_score = _score_objects(objects)
+
+    total = (
+            settings.SCORE_QUALITY_BONUS
+            + settings.SCORE_COLOR_WEIGHT * color_score
+            + settings.SCORE_WARM_WEIGHT * warm_score
+            + settings.SCORE_OBJECT_WEIGHT * object_score
+    )
+    return max(0.0, total)
 
 def analyze_photo_pipeline(
         file_bytes: bytes,
@@ -79,14 +129,24 @@ def analyze_photo_pipeline(
             session_id, poi_key, passed, q_dt, h_dt, c_dt, y_dt, total_ms
         )
 
+        object_models = [ObjectDetection(**o) if isinstance(o, dict) else o for o in objects_val]
+        score = score_analysis(
+            quality_passed=passed,
+            colorfulness=colorfulness_val,
+            warm_ratio=warm_ratio_val,
+            objects=object_models,
+        )
+
         # 결과 모델 구성
         result = AnalysisResult(
             qualityPassed=passed,
             colorfulness=colorfulness_val,
             warmRatio=warm_ratio_val,
             pHash=p_hash,
-            objects=[ObjectDetection(**o) if isinstance(o, dict) else o for o in objects_val],
+            objects=object_models,
+            score=score,
         )
+
         return result.model_dump()
 
     except Exception as e:

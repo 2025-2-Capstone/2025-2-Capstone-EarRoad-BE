@@ -18,6 +18,7 @@ class AnalysisResult(BaseModel):
     warmRatio: float = Field(..., ge=0.0, le=1.0, description="따뜻한 톤 비율 (0~1)")
     pHash: str = Field(..., description="Perceptual hash (중복 검사용)")
     objects: List[ObjectDetection] = Field(default_factory=list, description="YOLO 탐지 결과 리스트")
+    score: float = Field(..., ge=0.0, description="색채/YOLO 기반 최종 스코어")
 
 
 class AnalyzeRequest(BaseModel):
