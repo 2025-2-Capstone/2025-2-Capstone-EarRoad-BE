@@ -1,7 +1,7 @@
 import requests, json
 from pathlib import Path
 
-n = 18
+n = 15
 URL = "http://127.0.0.1:8000/analyze/photo"
 H = {"X-Auth-Token": "dev-shared-token"}
 
