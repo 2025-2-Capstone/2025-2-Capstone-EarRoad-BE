@@ -1,4 +1,4 @@
-import glob, requests, json
+import requests, json
 from pathlib import Path
 
 n = 18
