@@ -51,15 +51,14 @@ def quality_check(
     if img_bgr is None or img_bgr.ndim != 3:
         return False
 
-    # 1) 흐림 검사
     sharp_val = compute_sharpness_laplacian(img_bgr)
+    occ_val = occlusion_score(img_bgr)
+    logger.info(f"occlusion={occ_val:.5f} (threshold={occlusion_threshold})")
     logger.info(f"Sharpness={sharp_val:.5f} (threshold={blur_threshold})")
 
     if sharp_val < blur_threshold:
         return False
 
-    # 2) 렌즈가림 검사
-    occ_val = occlusion_score(img_bgr)
     if occ_val > occlusion_threshold:
         return False
 

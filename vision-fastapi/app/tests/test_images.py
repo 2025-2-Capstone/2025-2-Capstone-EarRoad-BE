@@ -1,7 +1,7 @@
 import glob, requests, json
 from pathlib import Path
 
-n = 10
+n = 18
 URL = "http://127.0.0.1:8000/analyze/photo"
 H = {"X-Auth-Token": "dev-shared-token"}
 
@@ -13,5 +13,5 @@ for i, path in enumerate(imgs, 1):
         r = requests.post(URL, headers=H,
                           files={"image": f},
                           data={"poiKey": "POI_123", "sessionId": "SESSION_abc"},
-                          timeout=20)
+                          timeout=100)
     print(i, path, r.status_code, json.dumps(r.json()))

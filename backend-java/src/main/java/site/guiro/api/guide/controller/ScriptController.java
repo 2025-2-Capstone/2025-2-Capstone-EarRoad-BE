@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import site.guiro.api.guide.dto.AnalysisResponse;
 import site.guiro.api.guide.dto.AnalysisResult;
-import site.guiro.api.guide.dto.ScriptResponse;
 import site.guiro.api.guide.service.ScriptService;
 
 @RestController
@@ -31,11 +30,23 @@ public class ScriptController {
 
         // result를 통해 사진 데이터 저장
 
-        AnalysisResponse analysisresponse = new AnalysisResponse();
+
+        // 품질 검사 결과 출력
+        AnalysisResponse analysisresponse = AnalysisResponse.builder()
+                .qualityPassed(result.isQualityPassed())
+                .build();
         return ResponseEntity.ok(analysisresponse);
     }
 
     // 스크립트 생성 api 분리
+    @GetMapping(produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> getBestImageUrl(
+            @RequestParam("poiKey") String poiKey,
+            @RequestParam("sessionId") String sessionId
+    ) {
+        String url = ".."; // qualityPassed=true만 고려
+        return ResponseEntity.ok(url);
+    }
 
 
 }
