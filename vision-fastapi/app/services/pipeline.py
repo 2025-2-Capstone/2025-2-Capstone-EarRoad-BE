@@ -129,6 +129,7 @@ def analyze_photo_pipeline(
             session_id, poi_key, passed, q_dt, h_dt, c_dt, y_dt, total_ms
         )
 
+
         object_models = [ObjectDetection(**o) if isinstance(o, dict) else o for o in objects_val]
         score = score_analysis(
             quality_passed=passed,
@@ -136,6 +137,7 @@ def analyze_photo_pipeline(
             warm_ratio=warm_ratio_val,
             objects=object_models,
         )
+        logger.info(f"Score={score:.8f} ")
 
         # 결과 모델 구성
         result = AnalysisResult(
