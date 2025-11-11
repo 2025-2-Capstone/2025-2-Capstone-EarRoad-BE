@@ -11,9 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 public class ScriptRequest {
 
+    private MultipartFile image;
+
     @NotBlank
     private String poiKey;
 
-    private MultipartFile image;
+    @NotBlank
+    private int sessionId;
 
 }

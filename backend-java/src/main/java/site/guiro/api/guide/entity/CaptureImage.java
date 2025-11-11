@@ -35,4 +35,22 @@ public class CaptureImage {
     @JoinColumn(name = "poi_key")
     private PoiCache poiKey;
 
+    @Column(name = "session_id", nullable = false)
+    private String sessionId;
+
+    @Column(name = "quality_passed", nullable = false)
+    private boolean qualityPassed;
+
+    @Column(name = "colorfulness", columnDefinition = "double")
+    private Double colorfulness;
+
+    @Column(name = "warm_ratio", columnDefinition = "double")
+    private Double warmRatio;
+
+    @Column(name = "phash", length = 32)
+    private String pHash;
+
+    @Column(name = "objects_json") // TEXT/JSON
+    private String objectsJson;
+
 }

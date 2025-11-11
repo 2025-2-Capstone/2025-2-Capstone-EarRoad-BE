@@ -3,8 +3,7 @@ package site.guiro.api.guide.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import site.guiro.api.guide.dto.ScriptRequest;
-import site.guiro.api.guide.dto.ScriptResponse;
+import site.guiro.api.guide.dto.AnalysisResult;
 
 /**
  * - 이미지 분석(FastAPI/Python) : 여러 장 중 품질/콘텐츠 기준으로 대표 이미지 1장 선택
@@ -15,30 +14,12 @@ import site.guiro.api.guide.dto.ScriptResponse;
 @Service
 @RequiredArgsConstructor
 public class ScriptService {
-    public ScriptResponse generateScript(ScriptRequest request) {
-        MultipartFile image = request.getImage();
-        if (image == null || image.isEmpty()) {
-            // 실제에선 커스텀 예외 던지기
-            return ScriptResponse.builder()
-                    .scriptId("ERROR_NO_IMAGE")
-                    .text("이미지가 없습니다.")
-                    .build();
-        }
 
-        // 2) (예시) FastAPI 분석 → 대표 이미지 선택 (스텁)
+    private final VisionAnalyzeClient visionAnalyzeClient;
 
-
-        // 3) poiKey로 텍스트 조회 (스텁)
-        String poiText = "POI(" + request.getPoiKey() + ") 기본 텍스트";
-
-        // 4) Gemini 호출해 스크립트 생성 (스텁)
-        String script = "[DEMO] " + poiText + " + 대표이미지(" + image.getOriginalFilename() + ") 기반 스크립트";
-
-        // 5) ID 발급/저장 로직은 필요 시 추가
-        return ScriptResponse.builder()
-                .scriptId("SCR-0001")
-                .text(script)
-                .build();
+    public AnalysisResult analyzePhoto(MultipartFile image, String poiKey, String sessionId) {
+        // FastAPI에 실제 분석 요청 → 품질검사 실패 시에도 JSON 형식은 동일
+        return visionAnalyzeClient.analyzePhoto(image, poiKey, sessionId);
     }
 
 
