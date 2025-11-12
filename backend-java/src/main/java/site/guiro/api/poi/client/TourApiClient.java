@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import site.guiro.api.poi.config.TourApiProperties;
 import site.guiro.api.poi.dto.NearbyResponse;
+import site.guiro.api.poi.dto.PoiResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.List;
 public class TourApiClient {
 
     private static final String PATH_LOCATION_BASED_LIST = "/locationBasedList2";
+    private static final String PATH_DETAIL_COMMON = "/detailCommon2";
     private static final String QUERY_PARAM_MOBILE_OS = "ETC";
     private static final String QUERY_PARAM_MOBILE_APP = "guiro";
     private static final String QUERY_PARAM_TYPE = "json";
@@ -45,6 +47,23 @@ public class TourApiClient {
                 .block();
 
         return mapToNearbyResponse(responseNode);
+    }
+
+    public PoiResponse fetchPoiDetail(String poiKey) {
+        JsonNode responseNode = tourWebClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(PATH_DETAIL_COMMON)
+                        .queryParam("serviceKey", properties.serviceKey())
+                        .queryParam("MobileOS", QUERY_PARAM_MOBILE_OS)
+                        .queryParam("MobileApp", QUERY_PARAM_MOBILE_APP)
+                        .queryParam("_type", QUERY_PARAM_TYPE)
+                        .queryParam("contentId", poiKey)
+                        .build())
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+
+        return mapToPoiResponse(responseNode);
     }
 
     private NearbyResponse mapToNearbyResponse(JsonNode root) {
@@ -112,6 +131,82 @@ public class TourApiClient {
         }
     }
 
+    private PoiResponse mapToPoiResponse(JsonNode root) {
+        if (root == null) {
+            return PoiResponse.builder()
+                    .poiKey("")
+                    .name("")
+                    .content("")
+                    .address("")
+                    .build();
+        }
+
+        JsonNode responseNode = root.path("response");
+        JsonNode bodyNode = responseNode.isMissingNode() ? root.path("body") : responseNode.path("body");
+        if (bodyNode.isMissingNode() || bodyNode.isNull()) {
+            return PoiResponse.builder()
+                    .poiKey("")
+                    .name("")
+                    .content("")
+                    .address("")
+                    .build();
+        }
+
+        JsonNode itemsNode = bodyNode.path("items");
+        JsonNode itemNode = itemsNode.path("item");
+        if (itemNode.isArray()) {
+            itemNode = itemNode.get(0);
+        }
+
+        if (itemNode == null || itemNode.isMissingNode() || itemNode.isNull()) {
+            return PoiResponse.builder()
+                    .poiKey("")
+                    .name("")
+                    .content("")
+                    .address("")
+                    .build();
+        }
+
+        String poiKey = itemNode.path("contentid").asText("");
+        String name = itemNode.path("title").asText("");
+        String content = itemNode.path("overview").asText("");
+        String address = buildAddress(itemNode);
+
+        return PoiResponse.builder()
+                .poiKey(poiKey)
+                .name(name)
+                .content(content)
+                .address(address)
+                .build();
+    }
+
+    private String buildAddress(JsonNode itemNode) {
+        String addr1 = normalizeAddressPart(itemNode.path("addr1").asText(null));
+        String addr2 = normalizeAddressPart(itemNode.path("addr2").asText(null));
+
+        if (addr1 == null && addr2 == null) {
+            return "";
+        }
+
+        if (addr1 == null) {
+            return addr2;
+        }
+
+        if (addr2 == null) {
+            return addr1;
+        }
+
+        return addr1 + " " + addr2;
+    }
+
+    private String normalizeAddressPart(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
     private String doubleToString(double value) {
         return Double.toString(value);
     }
@@ -124,4 +219,5 @@ public class TourApiClient {
                 .totalElements(0)
                 .build();
     }
+
 }

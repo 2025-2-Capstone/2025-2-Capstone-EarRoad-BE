@@ -1,16 +1,14 @@
 package site.guiro.api.poi.controller;
 
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import site.guiro.api.poi.dto.CheckRequest;
+import site.guiro.api.poi.dto.CheckResponse;
 import site.guiro.api.poi.dto.NearbyResponse;
+import site.guiro.api.poi.dto.PoiResponse;
 import site.guiro.api.poi.service.PoiService;
 
 
@@ -31,5 +29,15 @@ public class PoiController {
             @RequestParam("radius") @NotNull @Positive Double radiusMeters
     ) {
         return poiService.getNearbyPois(latitude, longitude, radiusMeters);
+    }
+
+    @GetMapping("/{poiKey}")
+    public PoiResponse getPoiDetail(@PathVariable("poiKey") @NotBlank String poiKey) {
+        return poiService.getPoiDetail(poiKey);
+    }
+
+    @PostMapping("/check")
+    public CheckResponse checkPoiDistance(@RequestBody @Valid CheckRequest request) {
+        return poiService.checkPoiDistance(request);
     }
 }
