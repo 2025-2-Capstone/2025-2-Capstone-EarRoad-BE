@@ -35,6 +35,7 @@ public class ScriptController {
         AnalysisResponse analysisresponse = AnalysisResponse.builder()
                 .qualityPassed(result.isQualityPassed())
                 .build();
+
         return ResponseEntity.ok(analysisresponse);
     }
 

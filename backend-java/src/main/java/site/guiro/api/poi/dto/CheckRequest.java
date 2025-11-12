@@ -17,12 +17,12 @@ public class CheckRequest {
     @NotNull
     @DecimalMin(value = "-90.0", inclusive = true)
     @DecimalMax(value = "90.0", inclusive = true)
-    private Double lat;
+    private Double currentLat;
 
     // WGS84 경도: -180 ~ 180 (필수)
     @NotNull
     @DecimalMin(value = "-180.0", inclusive = true)
     @DecimalMax(value = "180.0", inclusive = true)
-    private Double lng;
+    private Double currentLng;
 
 }
