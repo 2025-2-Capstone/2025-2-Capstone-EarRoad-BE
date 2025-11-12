@@ -27,3 +27,6 @@ guiro:
     token: dev-shared-token
     connect-timeout-ms: 5000
     read-timeout-ms: 5000
+  tour:
+    base-url: https://apis.data.go.kr/B551011/KorService2
+    service-key: ${TOUR_API_SERVICE_KEY}
