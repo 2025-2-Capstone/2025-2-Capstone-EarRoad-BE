@@ -23,8 +23,8 @@ public class Device {
     @Column(name = "id") // BIGINT AUTO_INCREMENT
     private Long id;
 
-    @Column(name = "device_id", length = 44, nullable = false) // SHA-256(Base64/Url)
-    private String deviceId;
+    @Column(name = "uuid", length = 44, nullable = false) // SHA-256(Base64/Url)
+    private String uuId;
 
     @Column(name = "platform", length = 16) // 'ANDROID' | 'IOS'
     @Enumerated(EnumType.STRING)
