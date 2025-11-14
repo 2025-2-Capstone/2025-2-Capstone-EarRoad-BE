@@ -20,7 +20,7 @@ public class PoiController {
 
     private final PoiService poiService;
 
-    // PoiController → PoiService → TourApiClient 순으로 흘러가며,
+    // PoiController - PoiService - TourApiClient 순으로 흘러가며,
     // 외부 TourAPI에서 가져온 데이터를 NearbyResponse DTO로 변환해 그대로 반환합니다.
     @GetMapping("/nearby")
     public NearbyResponse getNearbyPois(

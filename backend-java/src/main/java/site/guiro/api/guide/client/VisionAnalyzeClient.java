@@ -1,5 +1,4 @@
-package site.guiro.api.guide.service;
-
+package site.guiro.api.guide.client;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;

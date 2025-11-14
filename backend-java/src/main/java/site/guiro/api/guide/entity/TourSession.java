@@ -17,24 +17,11 @@ public class TourSession {
 
     @Id
     @Column(name = "session_id", length = 36, nullable = false, updatable = false)
-    private String sessionId; // UUID 등
+    private String sessionId;
 
     @Column(name = "status", length = 16, nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;    // IDLE/DEST_SET/GUIDING/PAUSED/ENDED
-
-    @Column(name = "radius_meters")
-    @Builder.Default
-    private Integer radiusMeters = 100;
-
-    @Column(name = "last_lat")
-    private Double lastLat;
-
-    @Column(name = "last_lng")
-    private Double lastLng;
-
-    @Column(name = "last_distance_m")
-    private Double lastDistanceM;
 
     @Column(name = "started_at", nullable = false, updatable = false)
     private Instant startedAt;

@@ -3,6 +3,7 @@ package site.guiro.api.guide.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import site.guiro.api.guide.client.VisionAnalyzeClient;
 import site.guiro.api.guide.dto.AnalysisResult;
 
 /**

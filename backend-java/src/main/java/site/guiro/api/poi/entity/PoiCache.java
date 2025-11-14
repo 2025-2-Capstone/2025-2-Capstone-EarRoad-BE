@@ -26,12 +26,6 @@ public class PoiCache {
     @Column(name = "name_ko", length = 200, nullable = false)
     private String nameKo;
 
-    @Column(name = "lat", precision = 10, scale = 7)
-    private BigDecimal lat;  // DECIMAL(10,7)
-
-    @Column(name = "lng", precision = 10, scale = 7)
-    private BigDecimal lng;  // DECIMAL(10,7)
-
     @Lob
     @Column(name = "content")
     private String content; // 관광지 설명문
