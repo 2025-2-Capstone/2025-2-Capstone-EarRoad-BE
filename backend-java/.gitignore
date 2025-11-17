@@ -16,7 +16,8 @@ build/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
-.pem
+private.pem
+public.pem
 
 ### IntelliJ IDEA ###
 .idea
