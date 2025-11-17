@@ -35,8 +35,8 @@ public class JwtConfig {
     private final JwtProperties jwtProperties;
 
     public JwtConfig(
-            @Value("classpath:certs/private.pem") Resource privateKeyResource,
-            @Value("classpath:certs/public.pem") Resource publicKeyResource,
+            @Value("${guiro.jwt.private-key-location}") Resource privateKeyResource,
+            @Value("${guiro.jwt.public-key-location}") Resource publicKeyResource,
             JwtProperties jwtProperties
     ) {
         this.privateKeyResource = privateKeyResource;
