@@ -31,3 +31,9 @@ guiro:
     base-url: https://apis.data.go.kr/B551011/KorService2
     service-key: ${TOUR_API_SERVICE_KEY}
     check-radius-meters: 5000
+
+auth:
+  jwt:
+    issuer: site.guiro.api
+    access-token-ttl: PT1H
+    refresh-token-ttl: P30D
