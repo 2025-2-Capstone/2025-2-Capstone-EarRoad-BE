@@ -8,7 +8,10 @@ import site.guiro.api.poi.dto.CheckRequest;
 import site.guiro.api.poi.dto.CheckResponse;
 import site.guiro.api.poi.dto.NearbyResponse;
 import site.guiro.api.poi.dto.PoiResponse;
+import site.guiro.api.poi.entity.PoiCache;
+import site.guiro.api.poi.repository.PoiCacheRepository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -17,13 +20,31 @@ public class PoiService {
 
     private final TourApiClient tourApiClient;
     private final TourApiProperties tourApiProperties;
+    private final PoiCacheRepository poiCacheRepository;
+
 
     public NearbyResponse getNearbyPois(double latitude, double longitude, double radiusMeters) {
         return tourApiClient.fetchNearbyPois(latitude, longitude, radiusMeters);
     }
 
     public PoiResponse getPoiDetail(String poiKey) {
-        return tourApiClient.fetchPoiDetail(poiKey);
+        PoiResponse response = tourApiClient.fetchPoiDetail(poiKey);
+        Instant now = Instant.now();
+
+        PoiCache poiCache = poiCacheRepository.findByPoiKey(poiKey)
+                .map(existing -> {
+                    existing.updateDetails(response.getName(), response.getContent(), now);
+                    return existing;
+                })
+                .orElseGet(() -> PoiCache.builder()
+                        .poiKey(response.getPoiKey())
+                        .nameKo(response.getName())
+                        .content(response.getContent())
+                        .fetchedAt(now)
+                        .build());
+
+        poiCacheRepository.save(poiCache);
+        return response;
     }
 
     public CheckResponse checkPoiDistance(CheckRequest request) {
