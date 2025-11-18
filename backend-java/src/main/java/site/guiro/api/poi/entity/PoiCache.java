@@ -6,7 +6,6 @@ import site.guiro.api.guide.entity.CaptureImage;
 import site.guiro.api.guide.entity.ExtractedSlot;
 import site.guiro.api.guide.entity.TourSession;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
