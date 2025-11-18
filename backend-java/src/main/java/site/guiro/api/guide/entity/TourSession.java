@@ -6,6 +6,7 @@ import site.guiro.api.device.entity.Device;
 import site.guiro.api.poi.entity.PoiCache;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Builder
@@ -46,4 +47,29 @@ public class TourSession {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "poi_key", nullable = false)
     private PoiCache poiKey;
+
+    public void setDestination(PoiCache poiCache, Instant now) {
+        this.poiKey = poiCache;
+        this.status = Status.DEST_SET;
+        this.updatedAt = now;
+        this.endedAt = null;
+        this.ttlUntil = null;
+    }
+
+    public void transitionToGuiding(Instant now) {
+        this.status = Status.GUIDING;
+        this.updatedAt = now;
+    }
+
+    public void transitionToPaused(Instant now) {
+        this.status = Status.PAUSED;
+        this.updatedAt = now;
+    }
+
+    public void end(Instant endedAt) {
+        this.status = Status.ENDED;
+        this.endedAt = endedAt;
+        this.updatedAt = endedAt;
+        this.ttlUntil = endedAt.plus(1, ChronoUnit.DAYS);
+    }
 }
