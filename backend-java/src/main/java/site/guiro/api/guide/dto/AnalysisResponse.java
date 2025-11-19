@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AnalysisResponse {
     boolean qualityPassed;
+    String imageKey;
+    String imageUrl;
 }
