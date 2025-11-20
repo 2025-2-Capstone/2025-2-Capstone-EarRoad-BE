@@ -25,6 +25,7 @@ public class ExtractedSlot {
     @Column(name = "slot_json", columnDefinition = "json", nullable = false)
     private String slotJson; // JSON 문자열
 
+    @Builder.Default
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 

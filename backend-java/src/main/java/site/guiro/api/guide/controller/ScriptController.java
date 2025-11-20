@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 import site.guiro.api.device.entity.Device;
 import site.guiro.api.device.repository.DeviceRepository;
 import site.guiro.api.guide.dto.AnalysisResponse;
-import site.guiro.api.guide.dto.AnalysisResult;
 import site.guiro.api.guide.service.ScriptService;
 
 @RestController

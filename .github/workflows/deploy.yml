@@ -1,0 +1,70 @@
+name: Deploy to EC2 on develop Merge
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Give permission to execute gradlew
+        working-directory: backend-java
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        working-directory: backend-java
+        run: ./gradlew clean build -x test
+
+      - name: Verify jar build output
+        run: ls -al backend-java/build/libs/
+
+      - name: Copy FastAPI files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          source: "vision-fastapi/**"
+          target: "~/fastapi-app"
+
+      - name: Copy jar to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}rm
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          source: "backend-java/build/libs/api-0.0.1-SNAPSHOT.jar"
+          target: "~/app"
+          overwrite: true
+
+      - name: Copy start script to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          source: "start.sh"
+          target: "~/app"
+          overwrite: true
+
+      - name: Restart Spring Boot using SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            chmod +x ~/app/start.sh
+            bash ~/app/start.sh

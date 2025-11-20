@@ -29,6 +29,7 @@ public class PoiCache {
     @Column(name = "content", columnDefinition = "LONGTEXT")
     private String content; // 관광지 설명문
 
+    @Builder.Default
     @Column(name = "fetched_at", nullable = false, updatable = false)
     private Instant fetchedAt = Instant.now();
 
