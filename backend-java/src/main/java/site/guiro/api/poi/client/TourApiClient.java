@@ -24,6 +24,7 @@ public class TourApiClient {
     private static final String QUERY_PARAM_TYPE = "json";
     private static final String QUERY_PARAM_ARRANGE = "C";
     private static final String CONTENT_TYPE_ID_TOURIST_ATTRACTION = "12";
+    private static final String DEFAULT_IMAGE_PLACEHOLDER = "NO_IMAGE";
 
     private final WebClient tourWebClient;
     private final TourApiProperties properties;
@@ -112,11 +113,13 @@ public class TourApiClient {
         String poiKey = node.path("contentid").asText("");
         String name = node.path("title").asText("");
         double distance = parseDistance(node.path("dist").asText(null));
+        String imageUrl = normalizeImageUrl(node.path("firstimage").asText(null));
 
         return NearbyResponse.PoiSummaryItem.builder()
                 .poiKey(poiKey)
                 .name(name)
                 .distance(distance)
+                .imageUrl(imageUrl)
                 .build();
     }
 
@@ -138,6 +141,7 @@ public class TourApiClient {
                     .name("")
                     .content("")
                     .address("")
+                    .imageUrl(DEFAULT_IMAGE_PLACEHOLDER)
                     .build();
         }
 
@@ -149,6 +153,7 @@ public class TourApiClient {
                     .name("")
                     .content("")
                     .address("")
+                    .imageUrl(DEFAULT_IMAGE_PLACEHOLDER)
                     .build();
         }
 
@@ -164,6 +169,7 @@ public class TourApiClient {
                     .name("")
                     .content("")
                     .address("")
+                    .imageUrl(DEFAULT_IMAGE_PLACEHOLDER)
                     .build();
         }
 
@@ -171,12 +177,14 @@ public class TourApiClient {
         String name = itemNode.path("title").asText("");
         String content = itemNode.path("overview").asText("");
         String address = buildAddress(itemNode);
+        String imageUrl = normalizeImageUrl(itemNode.path("firstimage").asText(null));
 
         return PoiResponse.builder()
                 .poiKey(poiKey)
                 .name(name)
                 .content(content)
                 .address(address)
+                .imageUrl(imageUrl)
                 .build();
     }
 
@@ -205,6 +213,15 @@ public class TourApiClient {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String normalizeImageUrl(String value) {
+        if (value == null) {
+            return DEFAULT_IMAGE_PLACEHOLDER;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? DEFAULT_IMAGE_PLACEHOLDER : trimmed;
     }
 
     private String doubleToString(double value) {

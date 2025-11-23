@@ -1,6 +1,7 @@
 package site.guiro.api.guide.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import site.guiro.api.device.repository.DeviceRepository;
 import site.guiro.api.guide.dto.AnalysisResponse;
 import site.guiro.api.guide.service.ScriptService;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/script")
 @RequiredArgsConstructor
@@ -34,9 +36,12 @@ public class ScriptController {
             @RequestPart("sessionId") String sessionId
     ) {
         Device device = resolveDevice(jwt);
+        log.info("[POST /api/v1/script/analysis] request deviceUuid={} poiKey={} sessionId={} imageName={}",
+                device.getUuid(), poiKey, sessionId, image.getOriginalFilename());
         AnalysisResponse response = scriptService.analyzeAndStore(image, poiKey, sessionId, device);
 
-
+        log.info("[POST /api/v1/script/analysis] response qualityPassed={} imageKey={} imageUrl={}",
+                response.isQualityPassed(), response.getImageKey(), response.getImageUrl());
         return ResponseEntity.ok(response);
     }
 
@@ -46,7 +51,9 @@ public class ScriptController {
             @RequestParam("poiKey") String poiKey,
             @RequestParam("sessionId") String sessionId
     ) {
+        log.info("[GET /api/v1/script] request poiKey={} sessionId={}", poiKey, sessionId);
         String url = ".."; // qualityPassed=true만 고려
+        log.info("[GET /api/v1/script] response url={}", url);
         return ResponseEntity.ok(url);
     }
 
