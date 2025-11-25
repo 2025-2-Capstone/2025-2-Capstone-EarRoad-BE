@@ -28,7 +28,6 @@ public class Script {
     @Column(name = "script_text", nullable = false)
     private String scriptText;
 
-    @Builder.Default
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 

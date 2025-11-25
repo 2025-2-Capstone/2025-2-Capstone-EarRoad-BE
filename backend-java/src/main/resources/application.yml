@@ -19,8 +19,7 @@ spring:
 
 server:
   port: 8080
-  address: 0.0.0.0
-  forward-headers-strategy: framework
+  address: 127.0.0.1
 
 guiro:
   vision:
@@ -33,8 +32,8 @@ guiro:
     service-key: ${TOUR_API_SERVICE_KEY}
     check-radius-meters: 5000
   jwt:
-    private-key-location: "file:/home/ec2-user/app/keys/private.pem"
-    public-key-location: "file:/home/ec2-user/app/keys/public.pem"
+    private-key-location: "file:${HOME}/Desktop/guiroKey/private.pem"
+    public-key-location: "file:${HOME}/Desktop/guiroKey/public.pem"
 
 
 auth:

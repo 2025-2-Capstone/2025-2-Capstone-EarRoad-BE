@@ -24,7 +24,6 @@ public class CaptureImage {
     @Column(name = "url", length = 100)
     private String imageKey; // S3에 들어갈 사진 키값
 
-    @Builder.Default
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 

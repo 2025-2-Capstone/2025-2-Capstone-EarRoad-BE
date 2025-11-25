@@ -12,5 +12,4 @@ public class PoiResponse {
     private String name;
     private String content;
     private String address;
-    private String imageUrl;
 }

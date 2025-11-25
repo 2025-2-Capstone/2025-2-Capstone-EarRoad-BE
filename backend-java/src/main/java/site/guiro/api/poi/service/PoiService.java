@@ -33,14 +33,13 @@ public class PoiService {
 
         PoiCache poiCache = poiCacheRepository.findByPoiKey(poiKey)
                 .map(existing -> {
-                    existing.updateDetails(response.getName(), response.getContent(), response.getImageUrl(), now);
+                    existing.updateDetails(response.getName(), response.getContent(), now);
                     return existing;
                 })
                 .orElseGet(() -> PoiCache.builder()
                         .poiKey(response.getPoiKey())
                         .nameKo(response.getName())
                         .content(response.getContent())
-                        .imageUrl(response.getImageUrl())
                         .fetchedAt(now)
                         .build());
 

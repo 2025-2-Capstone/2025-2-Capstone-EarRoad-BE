@@ -1,6 +1,6 @@
 from typing import Optional, Dict
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -30,10 +30,8 @@ class Settings(BaseSettings):
         "flower": 0.4,
     }
 
-    model_config = SettingsConfigDict(
-        env_file=".env",     # fastapi-app 내부에 별도 .env 있으면 여기서 읽고
-        extra="ignore",      # 그 외 환경변수(DB_URL 등)는 그냥 무시
-    )
+    class Config:
+        env_file = ".env"
 
 
 settings = Settings()

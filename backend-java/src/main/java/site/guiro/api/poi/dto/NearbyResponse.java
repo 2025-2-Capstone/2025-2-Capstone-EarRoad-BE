@@ -23,6 +23,5 @@ public class NearbyResponse {
         private String poiKey;
         private String name;
         private double distance;
-        private String imageUrl;
     }
 }
