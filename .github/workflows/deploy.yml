@@ -48,6 +48,7 @@ jobs:
           source: "backend-java/build/libs/*.jar"
           target: "~/app"
           overwrite: true
+          strip_components: 3
 
       - name: Restart Spring Boot using SSH
         uses: appleboy/ssh-action@v1.0.0
