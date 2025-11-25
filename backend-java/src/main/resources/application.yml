@@ -35,7 +35,9 @@ guiro:
   jwt:
     private-key-location: "file:/home/ec2-user/app/keys/private.pem"
     public-key-location: "file:/home/ec2-user/app/keys/public.pem"
-
+  s3:
+    bucket: guiro-capture-images
+    url-prefix: https://guiro-capture-images.s3.ap-northeast-2.amazonaws.com
 
 auth:
   jwt:
