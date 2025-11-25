@@ -29,6 +29,10 @@ public class PoiCache {
     @Column(name = "content", columnDefinition = "LONGTEXT")
     private String content; // 관광지 설명문
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
+    @Builder.Default
     @Column(name = "fetched_at", nullable = false, updatable = false)
     private Instant fetchedAt = Instant.now();
 
@@ -47,9 +51,10 @@ public class PoiCache {
     @OneToMany(mappedBy = "poiKey", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CaptureImage> captureImageList = new ArrayList<>();
 
-    public void updateDetails(String nameKo, String content, Instant fetchedAt) {
+    public void updateDetails(String nameKo, String content, String imageUrl, Instant fetchedAt) {
         this.nameKo = nameKo;
         this.content = content;
+        this.imageUrl = imageUrl;
         this.fetchedAt = fetchedAt;
     }
 }
