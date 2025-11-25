@@ -45,7 +45,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.PRIVATE_KEY }}
-          source: "backend-java/build/libs/api-0.0.1-SNAPSHOT.jar"
+          source: "backend-java/build/libs/*.jar"
           target: "~/app"
           overwrite: true
 
