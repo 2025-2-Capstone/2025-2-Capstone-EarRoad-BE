@@ -1,6 +1,7 @@
 package site.guiro.api.common.storage;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,7 +15,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 // AWS S3 업로드 구현체
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3StorageService implements ImageStorageService {
@@ -29,6 +30,9 @@ public class S3StorageService implements ImageStorageService {
         String seed = StringUtils.hasText(keyHint) ? sanitize(keyHint) : "capture";
         String key = prefix + seed + "-" + UUID.randomUUID() + extension;
 
+        log.info("[S3 upload] bucket={}, key={}, size={}, contentType={}",
+                props.bucket(), key, file.getSize(), file.getContentType());
+
         try {
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(props.bucket())
@@ -38,6 +42,7 @@ public class S3StorageService implements ImageStorageService {
 
             s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
         } catch (IOException | S3Exception e) {
+            log.info("[S3 upload] failed: bucket={}, key={}", props.bucket(), key, e);
             throw new IllegalStateException("S3 업로드에 실패했습니다", e);
         }
 
