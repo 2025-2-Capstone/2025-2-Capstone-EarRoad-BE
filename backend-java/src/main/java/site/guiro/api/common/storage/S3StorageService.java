@@ -1,5 +1,6 @@
 package site.guiro.api.common.storage;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,19 @@ public class S3StorageService implements ImageStorageService {
 
     private final S3Client s3Client;
     private final S3Properties props;
+    @PostConstruct
+    void logProps() {
+        log.info("[S3Config] bucket={}, urlPrefix={}", props.bucket(), props.urlPrefix());
+    }
 
     @Override
     public UploadedImage upload(MultipartFile file, String keyPrefix, String keyHint) {
+
+        if (!StringUtils.hasText(props.bucket())) {
+            throw new IllegalStateException("S3 bucket 이 설정되지 않았습니다. guiro.s3.bucket 값을 확인하세요.");
+        }
+
+
         String prefix = normalizePrefix(keyPrefix);
         String extension = resolveExtension(file.getOriginalFilename());
         String seed = StringUtils.hasText(keyHint) ? sanitize(keyHint) : "capture";
