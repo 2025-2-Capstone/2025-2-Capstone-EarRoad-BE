@@ -114,8 +114,13 @@ def analyze_photo_pipeline(
                 device=settings.TOURIST_DEVICE,
             )
             t_dt = (perf_counter() - t_t0) * 1000.0
-            if filter_result is not None and not filter_result.is_tourist:
-                passed = False
+            if filter_result is not None:
+                logger.info(
+                    "[sessionId={}] [poiKey={}] TouristFilter: is_tourist={} confidence={:.3f} raw_probs={}",
+                    session_id, poi_key,filter_result.is_tourist, filter_result.confidence, filter_result.raw_probs,
+                )
+                if not filter_result.is_tourist:
+                    passed = False
 
 
         if passed:
