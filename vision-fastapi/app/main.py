@@ -138,7 +138,7 @@ async def analyze_photo(
             poi_key=poiKey,
             session_id=sessionId,
             max_side=1024,
-            blur_threshold=2500.0,
+            blur_threshold=2000.0,
             occlusion_threshold=0.7,
         )
 

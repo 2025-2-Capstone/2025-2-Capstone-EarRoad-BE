@@ -9,3 +9,4 @@ pydantic-settings==2.6.1
 requests==2.32.3
 ultralytics==8.2.103
 pillow-heif==0.16.0
+torch==2.2.2

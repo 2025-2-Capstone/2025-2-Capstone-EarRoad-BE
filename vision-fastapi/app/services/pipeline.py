@@ -2,6 +2,8 @@
 from typing import Dict, Any, List
 from time import perf_counter
 from loguru import logger
+
+from . import tourist_filter
 from ..config import settings
 from ..models.dto import AnalysisResult, ObjectDetection
 from ..services import utils, quality, color, phash, yolo
@@ -100,7 +102,22 @@ def analyze_photo_pipeline(
         # 품질 불통과 시 조기 종료
         colorfulness_val, warm_ratio_val, objects_val = 0.0, 0.0, []
 
-        c_dt, y_dt = 0.0, 0.0
+        c_dt, y_dt, t_dt = 0.0, 0.0, 0.0
+
+        if passed:
+            # 관광지 필터
+            t_t0 = perf_counter()
+            filter_result = tourist_filter.classify_tourist(
+                img_bgr,
+                backbone_path=settings.TOURIST_BACKBONE_PATH,
+                mlp_path=settings.TOURIST_MLP_PATH,
+                device=settings.TOURIST_DEVICE,
+            )
+            t_dt = (perf_counter() - t_t0) * 1000.0
+            if filter_result is not None and not filter_result.is_tourist:
+                passed = False
+
+
         if passed:
             #  색채 분석
             c_t0 = perf_counter()
@@ -125,8 +142,8 @@ def analyze_photo_pipeline(
         # 로깅
         logger.info(
             "[sessionId={}] [poiKey={}] quality={} "
-            "timing(ms)={{quality:{:.1f}, phash:{:.1f}, color:{:.1f}, yolo:{:.1f}, total:{:.1f}}}",
-            session_id, poi_key, passed, q_dt, h_dt, c_dt, y_dt, total_ms
+            "timing(ms)={{quality:{:.1f}, phash:{:.1f}, tourist_filter:{:.f}, color:{:.1f}, yolo:{:.1f}, total:{:.1f}}}",
+            session_id, poi_key, passed, q_dt, h_dt, t_dt, c_dt, y_dt, total_ms
         )
 
 
