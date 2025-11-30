@@ -52,8 +52,12 @@ public class ScriptController {
             @RequestParam("sessionId") String sessionId
     ) {
         log.info("[GET /api/v1/script] request poiKey={} sessionId={}", poiKey, sessionId);
+        long start = System.currentTimeMillis();
         String script = scriptService.generateShortGuide(poiKey, sessionId);
         log.info("[GET /api/v1/script/short] response length={}", script.length());
+        long end = System.currentTimeMillis() - start;
+        double seconds = end / 1000.0;
+        log.info("[GET /api/v1/script/short] response duration={}", seconds);
         return ResponseEntity.ok(script);
     }
 
@@ -63,8 +67,12 @@ public class ScriptController {
             @RequestParam("sessionId") String sessionId
     ) {
         log.info("[GET /api/v1/script/long] request poiKey={} sessionId={}", poiKey, sessionId);
+        long start = System.currentTimeMillis();
         String script = scriptService.generateLongGuide(poiKey, sessionId);
         log.info("[GET /api/v1/script/long] response length={}", script.length());
+        long end = System.currentTimeMillis() - start;
+        double seconds = end / 1000.0;
+        log.info("[GET /api/v1/script/long] response duration={}", seconds);
         return ResponseEntity.ok(script);
     }
 
