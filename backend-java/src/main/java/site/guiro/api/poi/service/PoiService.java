@@ -58,7 +58,7 @@ public class PoiService {
 
         List<NearbyResponse.PoiSummaryItem> items = response.getContent();
         double distance = items == null ? 0.0 : items.stream()
-                .filter(item -> request.getPoiKey().equals(item.getPoiKey()))
+                .filter(item -> request.getPoiKey().trim().equals(item.getPoiKey().trim()))
                 .map(NearbyResponse.PoiSummaryItem::getDistance)
                 .findFirst()
                 .orElse(0.0);

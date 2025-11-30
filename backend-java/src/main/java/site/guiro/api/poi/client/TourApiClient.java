@@ -19,10 +19,11 @@ public class TourApiClient {
 
     private static final String PATH_LOCATION_BASED_LIST = "/locationBasedList2";
     private static final String PATH_DETAIL_COMMON = "/detailCommon2";
+    private static final String NUMOFROWS = "50";
     private static final String QUERY_PARAM_MOBILE_OS = "ETC";
     private static final String QUERY_PARAM_MOBILE_APP = "guiro";
     private static final String QUERY_PARAM_TYPE = "json";
-    private static final String QUERY_PARAM_ARRANGE = "C";
+    private static final String QUERY_PARAM_ARRANGE = "E";
     private static final String CONTENT_TYPE_ID_TOURIST_ATTRACTION = "12";
     private static final String DEFAULT_IMAGE_PLACEHOLDER = "NO_IMAGE";
 
@@ -34,6 +35,7 @@ public class TourApiClient {
                 .uri(uriBuilder -> uriBuilder
                         .path(PATH_LOCATION_BASED_LIST)
                         .queryParam("serviceKey", properties.serviceKey())
+                        .queryParam("numOfRows", NUMOFROWS)
                         .queryParam("MobileOS", QUERY_PARAM_MOBILE_OS)
                         .queryParam("MobileApp", QUERY_PARAM_MOBILE_APP)
                         .queryParam("_type", QUERY_PARAM_TYPE)
