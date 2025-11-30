@@ -40,8 +40,8 @@ public class ScriptController {
                 device.getUuid(), poiKey, sessionId, image.getOriginalFilename());
         AnalysisResponse response = scriptService.analyzeAndStore(image, poiKey, sessionId, device);
 
-        log.info("[POST /api/v1/script/analysis] response qualityPassed={} imageKey={} imageUrl={}",
-                response.isQualityPassed(), response.getImageKey(), response.getImageUrl());
+        log.info("[POST /api/v1/script/analysis] response qualityPassed={} score={} imageKey={} imageUrl={}",
+                response.isQualityPassed(), response.getScore(), response.getImageKey(), response.getImageUrl());
         return ResponseEntity.ok(response);
     }
 

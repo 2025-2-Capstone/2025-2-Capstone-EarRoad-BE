@@ -13,4 +13,5 @@ public class AnalysisResponse {
     boolean qualityPassed;
     String imageKey;
     String imageUrl;
+    Double score;
 }

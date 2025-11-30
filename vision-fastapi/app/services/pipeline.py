@@ -144,13 +144,6 @@ def analyze_photo_pipeline(
 
         total_ms = (perf_counter() - t0) * 1000.0
 
-        # 로깅
-        logger.info(
-            "[sessionId={}] [poiKey={}] quality={} "
-            "timing(ms)={{quality:{:.1f}, phash:{:.1f}, tourist_filter:{:.1f}, color:{:.1f}, yolo:{:.1f}, total:{:.1f}}}",
-            session_id, poi_key, passed, q_dt, h_dt, t_dt, c_dt, y_dt, total_ms
-        )
-
 
         object_models = [ObjectDetection(**o) if isinstance(o, dict) else o for o in objects_val]
         score = score_analysis(
@@ -159,7 +152,24 @@ def analyze_photo_pipeline(
             warm_ratio=warm_ratio_val,
             objects=object_models,
         )
-        logger.info(f"Score={score:.8f} ")
+
+        logger.info(
+            "[sessionId={}] [poiKey={}] quality={} score={:.4f} colorfulness={:.2f} warmRatio={:.3f} objects={} "
+            "timing(ms)={{quality:{:.1f}, phash:{:.1f}, tourist_filter:{:.1f}, color:{:.1f}, yolo:{:.1f}, total:{:.1f}}}",
+            session_id,
+            poi_key,
+            passed,
+            score,
+            colorfulness_val,
+            warm_ratio_val,
+            len(object_models),
+            q_dt,
+            h_dt,
+            t_dt,
+            c_dt,
+            y_dt,
+            total_ms,
+        )
 
         # 결과 모델 구성
         result = AnalysisResult(

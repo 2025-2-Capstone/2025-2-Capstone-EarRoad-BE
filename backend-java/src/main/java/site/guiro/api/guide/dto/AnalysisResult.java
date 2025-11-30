@@ -26,4 +26,5 @@ public class AnalysisResult {
     private double warmRatio;               // warm_ratio_lab()
     private String pHash;                   // 중복 검사용 perceptual hash
     private List<ObjectDetection> objects;   // YOLO 결과
+    private double score;                   // FastAPI가 계산한 최종 스코어
 }

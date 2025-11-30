@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,7 @@ import site.guiro.api.poi.repository.PoiCacheRepository;
  * - Gemini API 호출로 최종 스크립트 생성
  * - 스크립트 ID 발급/저장(선택) 후 응답 반환
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ScriptService {
@@ -49,6 +51,16 @@ public class ScriptService {
 
         AnalysisResult result = analyzePhoto(image, poiKey, sessionId);
 
+        log.info(
+                "[ANALYZE] poiKey={} sessionId={} qualityPassed={} score={} colorfulness={} warmRatio={}",
+                poiKey,
+                sessionId,
+                result.isQualityPassed(),
+                result.getScore(),
+                result.getColorfulness(),
+                result.getWarmRatio()
+        );
+
         String keyPrefix = result.isQualityPassed() ? "tourist/" : "non-tourist/";
         ImageStorageService.UploadedImage uploaded = imageStorageService.upload(image, keyPrefix, poiKey);
 
@@ -61,6 +73,7 @@ public class ScriptService {
                 .colorfulness(result.getColorfulness())
                 .warmRatio(result.getWarmRatio())
                 .pHash(result.getPHash())
+                .score(result.getScore())
                 .objectsJson(writeObjectsJson(result.getObjects()))
                 .build();
 
@@ -70,6 +83,7 @@ public class ScriptService {
                 .qualityPassed(result.isQualityPassed())
                 .imageKey(uploaded.getKey())
                 .imageUrl(uploaded.getUrl())
+                .score(result.getScore())
                 .build();
     }
 

@@ -51,6 +51,9 @@ public class CaptureImage {
     @Column(name = "phash", length = 32)
     private String pHash;
 
+    @Column(name = "score", columnDefinition = "double")
+    private Double score;
+
     @Column(name = "objects_json") // TEXT/JSON
     private String objectsJson;
 
