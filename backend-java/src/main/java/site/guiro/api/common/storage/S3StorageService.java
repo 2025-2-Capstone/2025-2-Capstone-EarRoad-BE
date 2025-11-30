@@ -1,6 +1,8 @@
 package site.guiro.api.common.storage;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,20 +16,33 @@ import java.io.IOException;
 import java.util.UUID;
 
 // AWS S3 업로드 구현체
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3StorageService implements ImageStorageService {
 
     private final S3Client s3Client;
     private final S3Properties props;
+    @PostConstruct
+    void logProps() {
+        log.info("[S3Config] bucket={}, urlPrefix={}", props.bucket(), props.urlPrefix());
+    }
 
     @Override
     public UploadedImage upload(MultipartFile file, String keyPrefix, String keyHint) {
+
+        if (!StringUtils.hasText(props.bucket())) {
+            throw new IllegalStateException("S3 bucket 이 설정되지 않았습니다. guiro.s3.bucket 값을 확인하세요.");
+        }
+
+
         String prefix = normalizePrefix(keyPrefix);
         String extension = resolveExtension(file.getOriginalFilename());
         String seed = StringUtils.hasText(keyHint) ? sanitize(keyHint) : "capture";
         String key = prefix + seed + "-" + UUID.randomUUID() + extension;
+
+        log.info("[S3 upload] bucket={}, key={}, size={}, contentType={}",
+                props.bucket(), key, file.getSize(), file.getContentType());
 
         try {
             PutObjectRequest request = PutObjectRequest.builder()
@@ -38,6 +53,7 @@ public class S3StorageService implements ImageStorageService {
 
             s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
         } catch (IOException | S3Exception e) {
+            log.info("[S3 upload] failed: bucket={}, key={}", props.bucket(), key, e);
             throw new IllegalStateException("S3 업로드에 실패했습니다", e);
         }
 
