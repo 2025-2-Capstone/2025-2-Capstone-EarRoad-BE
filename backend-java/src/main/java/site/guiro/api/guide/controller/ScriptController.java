@@ -46,15 +46,26 @@ public class ScriptController {
     }
 
     // 스크립트 생성 api 분리
-    @GetMapping(produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(path = "/short", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> getBestImageUrl(
             @RequestParam("poiKey") String poiKey,
             @RequestParam("sessionId") String sessionId
     ) {
         log.info("[GET /api/v1/script] request poiKey={} sessionId={}", poiKey, sessionId);
-        String url = ".."; // qualityPassed=true만 고려
-        log.info("[GET /api/v1/script] response url={}", url);
-        return ResponseEntity.ok(url);
+        String script = scriptService.generateShortGuide(poiKey, sessionId);
+        log.info("[GET /api/v1/script/short] response length={}", script.length());
+        return ResponseEntity.ok(script);
+    }
+
+    @GetMapping(path = "/long", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> getLongGuide(
+            @RequestParam("poiKey") String poiKey,
+            @RequestParam("sessionId") String sessionId
+    ) {
+        log.info("[GET /api/v1/script/long] request poiKey={} sessionId={}", poiKey, sessionId);
+        String script = scriptService.generateLongGuide(poiKey, sessionId);
+        log.info("[GET /api/v1/script/long] response length={}", script.length());
+        return ResponseEntity.ok(script);
     }
 
     private Device resolveDevice(Jwt jwt) {

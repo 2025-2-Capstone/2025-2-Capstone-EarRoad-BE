@@ -10,6 +10,8 @@ from fastapi.responses import PlainTextResponse
 from loguru import logger
 from .config import settings
 from .deps import verify_shared_token
+from .gemini.prompts import short_visual_guide_prompt, long_visual_guide_prompt
+from .gemini.service import run_gemini_with_image
 from .models.dto import AnalysisResult
 from .services.pipeline import analyze_photo_pipeline, PipelineError
 from .services.yolo import warmup_yolo, unload_yolo
@@ -150,3 +152,65 @@ async def analyze_photo(
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.post(
+    "/vision/guide/short",
+    dependencies=[Depends(verify_shared_token)],
+)
+async def vision_short(
+        place: str = Form(..., description="POI 한글명"),
+        overview: str = Form(..., description="POI 설명/콘텐츠"),
+        file: UploadFile = File(..., description="대표 이미지 파일"),
+):
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="빈 파일입니다")
+
+    logger.info(
+        "[/vision/guide/short] place={}, overview_length={}, filename={} size={} bytes",
+        place,
+        len(overview or ""),
+        file.filename,
+        len(content),
+    )
+
+    prompt = short_visual_guide_prompt(place, overview)
+    result = run_gemini_with_image(prompt, content, file.content_type)
+
+    return {
+        "mode": "short-vision",
+        "place": place,
+        "filename": file.filename,
+        "result": result,
+    }
+
+@app.post(
+    "/vision/guide/long",
+    dependencies=[Depends(verify_shared_token)],
+)
+async def vision_long(
+        place: str = Form(..., description="POI 한글명"),
+        overview: str = Form(..., description="POI 설명/콘텐츠"),
+        file: UploadFile = File(..., description="대표 이미지 파일"),
+):
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="빈 파일입니다")
+
+    logger.info(
+        "[/vision/guide/long] place={}, overview_length={}, filename={} size={} bytes",
+        place,
+        len(overview or ""),
+        file.filename,
+        len(content),
+    )
+
+    prompt = long_visual_guide_prompt(place, overview)
+    result = run_gemini_with_image(prompt, content, file.content_type)
+
+    return {
+        "mode": "long-vision",
+        "place": place,
+        "filename": file.filename,
+        "result": result,
+    }

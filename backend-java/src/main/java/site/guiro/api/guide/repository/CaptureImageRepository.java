@@ -12,4 +12,8 @@ public interface CaptureImageRepository extends JpaRepository<CaptureImage, Long
     Optional<CaptureImage> findTopByPoiKey_PoiKeyAndSessionIdAndQualityPassedTrueOrderByCreatedAtDesc(
             String poiKey, String sessionId
     );
+
+    Optional<CaptureImage> findTopByPoiKey_PoiKeyAndSessionIdAndQualityPassedTrueOrderByScoreDesc(
+            String poiKey, String sessionId
+    );
 }
