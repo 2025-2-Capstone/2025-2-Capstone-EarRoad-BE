@@ -12,6 +12,25 @@ from app.config import settings
 class GeminiModelUnavailable(Exception):
     pass
 
+def _extract_text_from_response(response) -> str:
+    """
+    response.text 대신 직접 candidates -> content.parts 에서 text만 뽑아오는 헬퍼.
+    이미지 inline_data 때문에 response.text 내부 구현이 터지는 문제를 우회한다.
+    """
+    texts = []
+    try:
+        for cand in getattr(response, "candidates", []) or []:
+            content = getattr(cand, "content", None)
+            if not content:
+                continue
+            for part in getattr(content, "parts", []) or []:
+                t = getattr(part, "text", None)
+                if t:
+                    texts.append(t)
+    except Exception as e:
+        logger.warning(f"[Gemini] 응답 파싱 중 오류: {e}")
+
+    return "\n".join(texts).strip()
 
 @lru_cache(maxsize=1)
 def _get_model():
@@ -52,7 +71,11 @@ def run_gemini_with_image(prompt: str, image_bytes: bytes, mime_type: Optional[s
                 }
             },
         ])
-        return response.text or ""
+        text = _extract_text_from_response(response)
+        if not text:
+            logger.warning("[Gemini] 응답에서 텍스트를 찾지 못했습니다.")
+        return text
+
     except GeminiModelUnavailable as exc:
         logger.error("[Gemini] configuration error: {}", exc)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)) from exc
