@@ -25,7 +25,7 @@ public class Script {
     private String promptVersion;
 
     @Lob
-    @Column(name = "script_text", nullable = false)
+    @Column(name = "script_text", nullable = false, columnDefinition = "TEXT")
     private String scriptText;
 
     @Builder.Default
