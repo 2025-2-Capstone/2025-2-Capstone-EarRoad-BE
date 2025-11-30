@@ -9,11 +9,15 @@ class Settings(BaseSettings):
     MAX_IMAGE_MB: int = 20
     SHARED_AUTH_TOKEN: str = "dev-shared-token"  # 스프링이 보내는 간단한 사전공유토큰
 
-    MODEL_PATH: Optional[str] = "yolov8n.pt"  # or None / "" 로 두면 더미 모드
+    MODEL_PATH: Optional[str] = "yolov8s.pt"  # or None / "" 로 두면 더미 모드
     YOLO_IMG_SIZE: int = 512                  # CPU 권장 기본값
     YOLO_CONF: float = 0.35
     YOLO_MAX_DET: int = 10
     YOLO_DEVICE: str = "cpu"
+
+    TOURIST_BACKBONE_PATH: Optional[str] = "yolov8s.pt"  # 관광지 필터 백본 (같은 파일 재사용)
+    TOURIST_MLP_PATH: Optional[str] = "../mlp_v1_yolov8s.pt"
+    TOURIST_DEVICE: str = "cpu"
 
     SCORE_QUALITY_BONUS: float = 0.2
     SCORE_COLORFULNESS_MAX: float = 180.0
