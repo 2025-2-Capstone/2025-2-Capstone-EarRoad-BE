@@ -147,7 +147,7 @@ def analyze_photo_pipeline(
         # 로깅
         logger.info(
             "[sessionId={}] [poiKey={}] quality={} "
-            "timing(ms)={{quality:{:.1f}, phash:{:.1f}, tourist_filter:{:.f}, color:{:.1f}, yolo:{:.1f}, total:{:.1f}}}",
+            "timing(ms)={{quality:{:.1f}, phash:{:.1f}, tourist_filter:{:.1f}, color:{:.1f}, yolo:{:.1f}, total:{:.1f}}}",
             session_id, poi_key, passed, q_dt, h_dt, t_dt, c_dt, y_dt, total_ms
         )
 
