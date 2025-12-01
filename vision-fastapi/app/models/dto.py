@@ -28,3 +28,7 @@ class AnalyzeRequest(BaseModel):
     """
     poiKey: str
     sessionId: str
+
+
+class DemoScriptResponse(BaseModel):
+    script: str = Field(..., description="생성된 데모 스크립트 텍스트")

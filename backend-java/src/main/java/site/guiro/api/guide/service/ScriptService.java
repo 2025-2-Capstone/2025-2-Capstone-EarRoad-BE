@@ -17,6 +17,7 @@ import site.guiro.api.guide.client.VisionAnalyzeClient;
 import site.guiro.api.guide.client.GeminiScriptClient;
 import site.guiro.api.guide.dto.AnalysisResponse;
 import site.guiro.api.guide.dto.AnalysisResult;
+import site.guiro.api.guide.dto.DemoScriptResponse;
 import site.guiro.api.guide.dto.GeminiVisionResponse;
 import site.guiro.api.guide.entity.CaptureImage;
 import site.guiro.api.guide.entity.Script;
@@ -52,6 +53,21 @@ public class ScriptService {
     public AnalysisResult analyzePhoto(MultipartFile image, String poiKey, String sessionId) {
         // FastAPI에 실제 분석 요청 → 품질검사 실패 시에도 JSON 형식은 동일
         return visionAnalyzeClient.analyzePhoto(image, poiKey, sessionId);
+    }
+
+    public String generateDemoScript(MultipartFile image, String name, String content) {
+        if (image == null || image.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미지가 비어 있습니다.");
+        }
+
+        DemoScriptResponse response = geminiScriptClient.requestDemoScript(name, content, image);
+
+        if (response == null || !StringUtils.hasText(response.getScript())) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "데모 스크립트를 생성하지 못했습니다.");
+        }
+
+        log.info("[DEMO SCRIPT] name={} contentLength={} imageName={}", name, content.length(), image.getOriginalFilename());
+        return response.getScript();
     }
 
     /**

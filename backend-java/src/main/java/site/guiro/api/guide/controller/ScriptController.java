@@ -45,6 +45,22 @@ public class ScriptController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping(
+            path = "/demo",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.TEXT_PLAIN_VALUE
+    )
+    public ResponseEntity<String> generateDemoScript(
+            @RequestPart("image") MultipartFile image,
+            @RequestPart("name") String name,
+            @RequestPart("content") String content
+    ) {
+        log.info("[POST /api/v1/script/demo] request name={} imageName={}", name, image.getOriginalFilename());
+        String script = scriptService.generateDemoScript(image, name, content);
+        log.info("[POST /api/v1/script/demo] response length={}", script.length());
+        return ResponseEntity.ok(script);
+    }
+
     // 스크립트 생성 api 분리
     @GetMapping(path = "/short", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> getBestImageUrl(

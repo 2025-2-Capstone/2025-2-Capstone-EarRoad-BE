@@ -12,7 +12,8 @@ from .config import settings
 from .deps import verify_shared_token
 from .gemini.prompts import short_visual_guide_prompt, long_visual_guide_prompt
 from .gemini.service import run_gemini_with_image
-from .models.dto import AnalysisResult
+from .models.dto import AnalysisResult, DemoScriptResponse
+from .services.demo_script import DemoScriptService
 from .services.pipeline import analyze_photo_pipeline, PipelineError
 from .services.yolo import warmup_yolo, unload_yolo
 
@@ -98,11 +99,26 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Guiro Vision API", version="0.2.0")
+demo_script_service = DemoScriptService()
 
 @app.get("/health", response_class=PlainTextResponse)
 async def health():
     """서버 상태 확인용"""
     return "OK"
+
+@app.post(
+    "/api/v1/script/demo",
+    response_model=DemoScriptResponse,
+    dependencies=[Depends(verify_shared_token)],
+)
+async def generate_demo_script(
+        name: str = Form(..., description="스크립트 생성 시 사용할 이름"),
+        content: str = Form(..., description="스크립트 생성 시 참고할 설명"),
+        image: UploadFile = File(..., description="Gemini로 바로 전달할 대표 이미지 1장"),
+):
+    script = await demo_script_service.generate_demo_script(name, content, image)
+    return DemoScriptResponse(script=script)
+
 
 @app.post(
     "/analyze/photo",
@@ -214,3 +230,4 @@ async def vision_long(
         "filename": file.filename,
         "result": result,
     }
+
