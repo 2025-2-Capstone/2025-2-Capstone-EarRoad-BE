@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     YOLO_DEVICE: str = "cpu"
 
     TOURIST_BACKBONE_PATH: Optional[str] = "yolov8s.pt"  # 관광지 필터 백본 (같은 파일 재사용)
-    TOURIST_MLP_PATH: Optional[str] = "mlp_v1_yolov8s.pt"
+    TOURIST_MLP_PATH: Optional[str] = "mlp_v2_yolov8s.pt"
     TOURIST_DEVICE: str = "cpu"
 
     SCORE_QUALITY_BONUS: float = 0.2

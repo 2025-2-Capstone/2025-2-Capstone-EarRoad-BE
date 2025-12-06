@@ -35,7 +35,7 @@ class TouristFilterResult:
 class _MLPHead(nn.Module):
     """
     학습 시 사용한 MLPHead와 동일한 구조:
-    - 입력: (B, C, H, W) feature map (YOLOv8s backbone 마지막 feature)
+    - 입력: (B, C, H, W) feature map (YOLOv8s backbone의 상단 feature)
     - GAP → Flatten → Linear( C → 256 ) → BN → ReLU → Dropout
             → Linear( 256 → 64 ) → BN → ReLU → Dropout
             → Linear( 64 → 1 )  # binary logit
@@ -63,36 +63,71 @@ class _MLPHead(nn.Module):
 
 
 class _TouristFilter:
+    """
+    새 체크포인트(mlp_v2_yolov8s.pt)를 사용하는 Tourist 필터.
+
+    - backbone_path: YOLOv8s 아키텍처 정의 파일 (예: "yolov8s.pt")
+    - mlp_path: 학습된 체크포인트 (예: "mlp_v2_yolov8s.pt")
+      -> 내부에 backbone_state_dict, mlp_state_dict, class_to_idx, in_channels,
+         non_tourist_idx, target_layer_idx 포함 (없으면 에러)
+    """
     def __init__(self, *, backbone_path: str, mlp_path: str, device: str):
         if not _TORCH_AVAILABLE:
             raise RuntimeError("torch 미설치로 Tourist 필터를 초기화할 수 없습니다")
         if not _ULTRALYTICS_AVAILABLE:
             raise RuntimeError("ultralytics 미설치로 Tourist 필터를 초기화할 수 없습니다")
 
-        # 항상 CPU만 사용 (서버에 GPU 없음)
+        # 서버는 CPU-only 이므로, config에서 device="cpu" 로 넘겨주면 됨
         self.device = torch.device(device)
 
-        # 1) YOLOv8s backbone 로드
+        # 1) YOLOv8s 아키텍처 로드
         yolo_wrapper = YOLO(backbone_path)
-        self.model = yolo_wrapper.model.to(self.device)
+        self.model: nn.Module = yolo_wrapper.model  # type: ignore[assignment]
+
+        # 2) 체크포인트 로드 (backbone + mlp 정보 포함)
+        ckpt = torch.load(mlp_path, map_location="cpu")
+
+        # 2-1) 필수 키 확인 및 로드 (없으면 바로 에러)
+        if "backbone_state_dict" not in ckpt:
+            raise RuntimeError("체크포인트에 'backbone_state_dict'가 없습니다. "
+                               "새 학습 스크립트로 생성된 파일인지 확인해주세요.")
+        if "mlp_state_dict" not in ckpt:
+            raise RuntimeError("체크포인트에 'mlp_state_dict'가 없습니다. "
+                               "새 학습 스크립트로 생성된 파일인지 확인해주세요.")
+        if "in_channels" not in ckpt:
+            raise RuntimeError("체크포인트에 'in_channels'가 없습니다. "
+                               "새 학습 스크립트로 생성된 파일인지 확인해주세요.")
+        if "target_layer_idx" not in ckpt:
+            raise RuntimeError("체크포인트에 'target_layer_idx'가 없습니다. "
+                               "새 학습 스크립트로 생성된 파일인지 확인해주세요.")
+
+        # YOLO 아키텍처에 finetune weight 적용
+        self.model.load_state_dict(ckpt["backbone_state_dict"])
+        self.model.to(self.device)
         self.model.eval()
         for p in self.model.parameters():
             p.requires_grad = False
 
-        # 2) Detect 바로 직전 레이어에 hook 등록 (학습 시와 동일)
+        # 3) Detect 바로 직전 레이어에 hook 등록 (학습 시와 동일 index)
         self._feat: Optional[torch.Tensor] = None
 
-        target_layer: nn.Module = self.model.model[-2]  # type: ignore[assignment]
+        modules = self.model.model  # type: ignore[assignment]
+        target_layer_idx = int(ckpt["target_layer_idx"])
+        if target_layer_idx < 0:
+            target_layer_idx = len(modules) + target_layer_idx
 
-        def _hook(module: nn.Module, inp, out: torch.Tensor):
+        if not (0 <= target_layer_idx < len(modules)):
+            raise RuntimeError(f"target_layer_idx={target_layer_idx} 가 유효하지 않습니다")
+
+        target_layer: nn.Module = modules[target_layer_idx]  # type: ignore[index]
+
+        def _hook(_module: nn.Module, _inp, out: torch.Tensor):
             # forward마다 마지막 feature를 저장
             self._feat = out
 
         target_layer.register_forward_hook(_hook)
 
-        # 3) 체크포인트 로드
-        ckpt = torch.load(mlp_path, map_location="cpu")
-
+        # 4) 라벨/채널 메타데이터
         self.class_to_idx: Dict[str, int] = ckpt.get(
             "class_to_idx",
             {"non_tourist": 0, "tourist": 1},
@@ -100,9 +135,9 @@ class _TouristFilter:
         self.idx_to_class: Dict[int, str] = {v: k for k, v in self.class_to_idx.items()}
         self.non_tourist_idx: int = int(ckpt.get("non_tourist_idx", 0))
 
-        in_channels: int = int(ckpt.get("in_channels", 512))
+        in_channels: int = int(ckpt["in_channels"])
 
-        # 4) MLPHead 생성 + 파라미터 로드
+        # 5) MLPHead 생성 + 파라미터 로드
         self.mlp = _MLPHead(in_channels=in_channels)
         self.mlp.load_state_dict(ckpt["mlp_state_dict"])
         self.mlp.to(self.device)
@@ -118,27 +153,23 @@ class _TouristFilter:
 
     def _preprocess(self, img_bgr: np.ndarray) -> torch.Tensor:
         """
-        BGR(OpenCV) 이미지를 학습 시 validation과 유사하게 전처리:
+        BGR(OpenCV) 이미지를 학습 시 validation과 동일하게 전처리:
         - BGR -> RGB
         - Resize(640, 640)
-        - ToTensor
-        - Normalize(Imagenet mean/std)
+        - CenterCrop(640)
+        - ToTensor()
+        - Normalize 없음 (0~1 범위 유지, YOLOv8 입력 분포와 일치)
         """
-        import cv2
         from PIL import Image
         import torchvision.transforms as T
 
-        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-        pil_img = Image.fromarray(img_rgb)
+        img_rgb = img_bgr[..., ::-1]          # BGR -> RGB (채널 뒤집기)
+        pil_img = Image.fromarray(img_rgb.astype(np.uint8))
 
         transform = T.Compose([
             T.Resize((640, 640)),
             T.CenterCrop(640),
             T.ToTensor(),
-            T.Normalize(
-                mean=(0.485, 0.456, 0.406),
-                std=(0.229, 0.224, 0.225),
-            ),
         ])
 
         tensor = transform(pil_img).unsqueeze(0)  # (1, 3, H, W)
@@ -147,7 +178,7 @@ class _TouristFilter:
     @torch.no_grad()
     def predict(self, img_bgr: np.ndarray) -> TouristFilterResult:
         """
-        - single logit + sigmoid → tourist(1) 확률으로 해석
+        - single logit + sigmoid → tourist(1) 확률로 해석
         - class_to_idx: {'non_tourist': 0, 'tourist': 1} 기준
         """
         x = self._preprocess(img_bgr)  # (1, 3, 640, 640)
@@ -163,8 +194,7 @@ class _TouristFilter:
             feat = feat[-1]
 
         logits = self.mlp(feat)             # (1, 1)
-        logit = logits.item()
-        prob_tourist = float(torch.sigmoid(torch.tensor(logit)))
+        prob_tourist = float(torch.sigmoid(logits).item())
 
         # binary: p1 = tourist, p0 = non_tourist
         prob_non_tourist = 1.0 - prob_tourist
@@ -179,6 +209,7 @@ class _TouristFilter:
             else:
                 raw_probs[name] = 0.0
 
+        # 기본 threshold = 0.5 (추후 운영하면서 조정 가능)
         is_tourist = prob_tourist >= 0.5
         confidence = max(prob_tourist, prob_non_tourist)
 
