@@ -32,3 +32,4 @@ class AnalyzeRequest(BaseModel):
 
 class DemoScriptResponse(BaseModel):
     script: str = Field(..., description="생성된 데모 스크립트 텍스트")
+    qualityPassed: bool = Field(..., description="사진 품질 검사 통과 여부")

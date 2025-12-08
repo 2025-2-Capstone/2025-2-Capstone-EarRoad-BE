@@ -10,4 +10,6 @@ import lombok.NoArgsConstructor;
 public class DemoScriptResponse {
 
     private String script;
+    private boolean qualityPassed;
+
 }

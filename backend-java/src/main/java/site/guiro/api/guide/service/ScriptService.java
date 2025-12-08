@@ -65,6 +65,10 @@ public class ScriptService {
         if (response == null || !StringUtils.hasText(response.getScript())) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "데모 스크립트를 생성하지 못했습니다.");
         }
+        if (!response.isQualityPassed()) {
+            log.warn("[DEMO SCRIPT] quality check failed for image={}", image.getOriginalFilename());
+            return response.getScript();
+        }
 
         log.info("[DEMO SCRIPT] name={} contentLength={} imageName={}", name, content.length(), image.getOriginalFilename());
         return response.getScript();
