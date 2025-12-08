@@ -116,8 +116,8 @@ async def generate_demo_script(
         content: str = Form(..., description="스크립트 생성 시 참고할 설명"),
         image: UploadFile = File(..., description="Gemini로 바로 전달할 대표 이미지 1장"),
 ):
-    script = await demo_script_service.generate_demo_script(name, content, image)
-    return DemoScriptResponse(script=script)
+    return await demo_script_service.generate_demo_script(name, content, image)
+
 
 
 @app.post(
