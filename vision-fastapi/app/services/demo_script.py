@@ -47,7 +47,7 @@ class DemoScriptService:
                 len(image_bytes),
             )
             return DemoScriptResponse(
-                script="사진 분석에 실패했습니다.",
+                script="설명해 드릴 만한 관광지 장면을 찾지 못했습니다. 다시 찍어주세요.",
                 qualityPassed=False,
             )
 
